@@ -1,0 +1,839 @@
+<html><head><base href="/">
+<style>
+@font-face {
+    font-family: 'Comic Sans MS';
+    src: local('Comic Sans MS');
+}
+
+body, * {
+    cursor: none !important;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+body {
+    background-color: #b0b0b0;
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', cursive;
+    position: relative;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    width: 100vw; /* Ensure body takes exactly viewport width */
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.background-shader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.9;
+    z-index: -1; /* Ensure it stays at bottom */
+    object-fit: cover;
+}
+
+.header {
+    background-color: #00cc00;
+    padding: 10px 20px 60px 20px;
+    text-align: center;
+    margin: 0;
+    border-radius: 0 0 50% 50% / 0 0 100px 100px;
+    width: 100%;
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.header h1 {
+    color: black;
+    margin: 0;
+    font-size: 3em;
+    font-weight: 300;
+}
+
+.content {
+    text-align: center;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden; /* Ensure content stays within viewport */
+}
+
+.friends-icon-container {
+    position: absolute;
+    left: 20px;
+    top: 150px;
+    width: 150px;
+    height: 150px;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -20px;  /* Adjusted from -10px */
+    right: -20px; /* Adjusted from -10px */
+    width: 60px;  /* Increased from 30px */
+    height: 60px; /* Increased from 30px */
+    display: none; /* Hidden by default */
+    z-index: 7000; /* Below click effect */
+}
+
+.addprofile-icon {
+    position: absolute;
+    right: 20px; 
+    top: 150px;  /* Changed from an implied higher value to match friends-icon position */
+    width: 150px;
+    height: 150px;
+}
+
+.profile-container {
+    position: fixed;
+    bottom: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.profile-text {
+    text-align: left;
+}
+
+.profile-name {
+    color: white;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 24px;
+    margin: 0 0 5px 0;
+}
+
+.profile-description {
+    color: white;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 18px;
+    margin: 0;
+    max-width: 300px;
+}
+
+.button-container {
+    position: fixed;
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    display: grid;  /* Change to grid */
+    grid-template-columns: 1fr 1fr;  /* Two equal columns */
+    justify-items: center;  /* Center items in grid cells */
+    padding: 0 200px;
+}
+
+.button {
+    padding: 25px 50px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 36px;
+    border: none;
+    color: black;
+    position: relative;
+    width: 200px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+}
+
+.accept-button {
+    background-image: url('ACCEPT_button.jpg');
+}
+
+.accept-button.hidden {
+    visibility: hidden;  /* Use visibility instead of display */
+    pointer-events: none;
+}
+
+.accept-button:hover {
+    opacity: 0.8;
+}
+
+.accept-button:hover span {
+    bottom: 15px;
+}
+
+.accept-button span {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-weight: bold;
+}
+
+.next-button {
+    background-image: url('NHext_button.jpg');
+}
+
+.next-button:hover {
+    opacity: 0.8;
+}
+
+.next-button:hover span {
+    top: 5px;
+}
+
+.next-button span {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-weight: bold;
+}
+
+#custom-cursor {
+    width: 48px;
+    height: 48px;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
+.click-effect {
+    width: 48px;
+    height: 48px;
+    position: fixed;
+    background-color: rgba(255, 255, 0, 0.8);
+    pointer-events: none;
+    animation: fadeOut 0.5s forwards;
+    z-index: 9998; /* Just below cursor's 9999 */
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 0.8;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #00cc00;
+    padding: 20px;
+    z-index: 8001; /* Above overlay but below click effect */
+    width: 400px;
+    max-width: 90vw; /* Prevent modal from causing horizontal scroll */
+    box-sizing: border-box; /* Include padding in width calculations */
+}
+
+/* Add specific positioning for add new profile modal */
+#addProfileModal {
+    left: calc(50% - 220px); /* Move left by offsetting in opposite direction */
+    transform: translate(-50%, -50%);
+}
+
+/* Keep current profiles modal positioning */
+#currentProfilesModal {
+    width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
+    left: calc(50% + 220px);
+    transform: translate(-50%, -50%);
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal input, .modal textarea {
+    font-family: 'Comic Sans MS', cursive;
+    padding: 10px;
+    border: 2px solid black;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.modal textarea {
+    height: 100px;
+    resize: none;
+}
+
+.file-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Updated .add-button styling */
+.add-button {
+    padding: 15px 30px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 24px;
+    border: none;
+    color: black;
+    background-image: url('ADD_button.jpg');
+    background-size: cover;
+    background-position: center;
+    width: 150px;
+    height: 60px; /* Add fixed height */
+    margin: 20px auto; /* Increase margin */
+    display: block; /* Ensure button is block-level */
+    position: relative; /* For text positioning */
+}
+
+/* Updated hover effect */
+.add-button:hover {
+    opacity: 0.8;
+}
+
+/* Updated text styling for the button */
+.add-button::after {
+    content: 'ADD';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    font-size: 28px;
+    color: black;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    display: none;
+    margin-top: 5px;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 8000; /* Below click effect */
+}
+
+.profile-entry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+}
+
+.profile-entry img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.profile-entry-name {
+    flex-grow: 1;
+    font-size: 18px;
+}
+
+.delete-button {
+    padding: 5px 15px;
+    font-family: 'Comic Sans MS', cursive;
+    font-size: 16px;
+    border: none;
+    color: black;
+    background-image: url('NHext_button.jpg');
+    background-size: cover;
+    background-position: center;
+    border-radius: 5px;
+}
+
+.delete-button:hover {
+    opacity: 0.8;
+}
+
+#currentProfilesModal {
+    width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
+    left: calc(50% + 220px); /* Increase the offset from center to move it right */
+}
+
+#currentProfilesList {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<img class="background-shader" src="shader.jpg" alt="circle halftone pattern with subtle texture" width="100%" height="100%" draggable="false">
+
+<div class="header">
+    <h1>MEET FRIENDS! oldWebs</h1>
+</div>
+
+<div class="content">
+    <div class="friends-icon-container">
+        <img class="friends-icon" src="friends.png" alt="minimalist person icon in white on black background" width="150" height="150" draggable="false">
+        <img class="notification-badge" src="newnotif.png" alt="notification badge" width="60" height="60" draggable="false">
+    </div>
+    <img class="addprofile-icon" src="addprofile.png" alt="add profile icon with plus sign" width="150" height="150" draggable="false">
+</div>
+
+<div class="profile-container">
+    <img class="profile-image" src="guy1.jpg" alt="Profile picture" width="200" height="200" draggable="false">
+    <div class="profile-text">
+        <h2 class="profile-name">dad</h2>
+        <p class="profile-description">hello i am yes your. dad please accept. my offer</p>
+    </div>
+</div>
+
+<div class="button-container">
+    <button class="button accept-button"><span>ACCEPT</span></button>
+    <button class="button next-button"><span>NHext</span></button>
+</div>
+
+<img id="custom-cursor" src="https://files.catbox.moe/2sk18w.png" alt="hand drawn cursor" width="48" height="48" draggable="false">
+
+<audio id="backgroundMusic" loop>
+    <source src="bgmusic.mp3" type="audio/mp3">
+</audio>
+
+<audio id="mouseHoldSound">
+    <source src="mousehold.wav" type="audio/wav">
+</audio>
+
+<audio id="mouseReleaseSound">
+    <source src="mouserelease.wav" type="audio/wav">
+</audio>
+
+<audio id="fixmeSound">
+    <source src="fixme.wav" type="audio/wav">
+</audio>
+
+<audio id="exportSound" loop>
+    <source src="export.wav" type="audio/wav">
+</audio>
+
+<audio id="profileAddSound">
+    <source src="profileadd.wav" type="audio/wav">
+</audio>
+
+<audio id="notificationSound">
+    <source src="notification.wav" type="audio/wav">
+</audio>
+
+<div class="modal-overlay" id="modalOverlay"></div>
+<div class="modal" id="addProfileModal">
+    <div class="modal-content">
+        <h2>Add New Profile</h2>
+        <input type="text" id="profileName" placeholder="Enter name">
+        <div class="error-message" id="nameError">Name contains inappropriate content</div>
+        
+        <textarea id="profileDescription" placeholder="Enter description"></textarea>
+        <div class="error-message" id="descriptionError">Description contains inappropriate content</div>
+        
+        <div class="file-input-container">
+            <label for="profileImage">Profile Picture:</label>
+            <input type="file" id="profileImage" accept="image/*">
+        </div>
+        
+        <!-- Remove onclick from button and use class only -->
+        <button class="add-button"></button>
+    </div>
+</div>
+<div class="modal" id="currentProfilesModal">
+    <div class="modal-content">
+        <h2>Current Profiles</h2>
+        <div id="currentProfilesList">
+            <!-- Profiles will be inserted here dynamically -->
+        </div>
+    </div>
+</div>
+
+<script>
+let hasPlayedNotification = false; // Added flag to track if notification has played before
+
+function showNotification() {
+    const notificationBadge = document.querySelector('.notification-badge');
+    const notificationSound = document.getElementById('notificationSound');
+    
+    // Show notification badge
+    notificationBadge.style.display = 'block';
+    
+    // Only play sound if this is the first notification
+    if (!hasPlayedNotification) {
+        notificationSound.currentTime = 0;
+        notificationSound.play();
+        hasPlayedNotification = true;
+    }
+}
+
+function containsInappropriateContent(text) {
+    if (!text) return false;
+
+    // Convert text to lowercase for case-insensitive matching
+    const lowerText = text.toLowerCase();
+
+    // List of inappropriate words and their common variations
+    const inappropriateWords = [
+        'nigga',
+        'nigger',
+        'faggot',
+        'retard',
+        // Common bypasses
+        'n1gga',
+        'n1gg3r',
+        'nigg3r',
+        'f4gg0t',
+        'r3tard',
+        // Add more variations as needed
+    ];
+
+    // Check for exact matches and variations
+    return inappropriateWords.some(word => {
+        // Check for exact match
+        if (lowerText.includes(word)) return true;
+
+        // Check for variations with spaces or special characters
+        const spacedWord = word.split('').join(' ');
+        if (lowerText.includes(spacedWord)) return true;
+
+        // Check for variations with dots
+        const dottedWord = word.split('').join('.');
+        if (lowerText.includes(dottedWord)) return true;
+
+        return false;
+    });
+}
+
+const profiles = [
+    {
+        image: 'https://jybkuii4cxzlwx2lnjyz.c.wbsm.ai/guy1.jpg',
+        name: 'dad',
+        description: 'hello i am yes your. dad please accept. my offer'
+    },
+    {
+        image: 'https://jybkuii4cxzlwx2lnjyz.c.wbsm.ai/guy2.jpg',
+        name: 'Sir BartholoMew the third',
+        description: 'if you know you. Know. Still liquid.'
+    },
+    {
+        image: 'https://jybkuii4cxzlwx2lnjyz.c.wbsm.ai/guy3.jpg',
+        name: 'brother',
+        description: 'mom say. xbox is mine turn. now give controller. or else bad.'
+    },
+    {
+        image: 'https://jybkuii4cxzlwx2lnjyz.c.wbsm.ai/guy4.jpg',
+        name: 'cousin',
+        description: 'need money. very urgent please. will giving back. tommorow trust. me yes.'
+    },
+    {
+        image: 'https://jybkuii4cxzlwx2lnjyz.c.wbsm.ai/guy5.jpg',
+        name: 'the green one is here',
+        description: 'the green one is here'
+    },
+    {
+        image: 'https://jybkuii4cxzlwx2lnjyz.c.wbsm.ai/guy6.jpg',
+        name: 'neighbor',
+        description: 'cat yours. in my garden again. please remove. or i eat it. maybe.'
+    }
+];
+
+// Initialize allProfiles with the default profiles
+let allProfiles = [...profiles];
+let currentProfileIndex = Math.floor(Math.random() * allProfiles.length);
+let hasAcceptedCurrent = false;
+
+function updateProfile() {
+    const profileImage = document.querySelector('.profile-image');
+    const profileName = document.querySelector('.profile-name');
+    const profileDescription = document.querySelector('.profile-description');
+    const acceptButton = document.querySelector('.accept-button');
+
+    const profile = allProfiles[currentProfileIndex];
+    profileImage.src = profile.image;
+    profileName.textContent = profile.name;
+    profileDescription.textContent = profile.description;
+    
+    acceptButton.classList.remove('hidden');  // Remove hidden class
+    hasAcceptedCurrent = false;
+}
+
+// Initial profile setup
+updateProfile();
+
+const backgroundMusic = document.getElementById('backgroundMusic');
+const cursor = document.getElementById('custom-cursor');
+const mouseHoldSound = document.getElementById('mouseHoldSound');
+const mouseReleaseSound = document.getElementById('mouseReleaseSound');
+const fixmeSound = document.getElementById('fixmeSound');
+const exportSound = document.getElementById('exportSound');
+const profileAddSound = document.getElementById('profileAddSound');
+const friendsIcon = document.querySelector('.friends-icon');
+const acceptButton = document.querySelector('.accept-button');
+const nextButton = document.querySelector('.next-button');
+
+let clickCount = 0;
+
+// Start playing background music and loop it
+backgroundMusic.loop = true;
+backgroundMusic.play().catch(function(error) {
+    console.log("Audio autoplay was prevented. User interaction is required.");
+});
+
+const acceptBellSound = new Audio('acceptbell.wav');
+const nextBellSound = new Audio('nextbell.wav');
+
+acceptButton.addEventListener('click', function() {
+    acceptBellSound.currentTime = 0;
+    acceptBellSound.play();
+    acceptButton.classList.add('hidden');  // Use class instead of display none
+    hasAcceptedCurrent = true;
+});
+
+nextButton.addEventListener('click', function() {
+    if (!hasAcceptedCurrent) {
+        nextBellSound.currentTime = 0;
+        nextBellSound.play();
+    }
+    
+    let newIndex;
+    do {
+        newIndex = Math.floor(Math.random() * allProfiles.length);
+    } while (newIndex === currentProfileIndex);
+    
+    currentProfileIndex = newIndex;
+    updateProfile();
+});
+
+let lastUpdateTime = 0;
+const updateInterval = 70;
+
+document.addEventListener('mousemove', function(e) {
+    const currentTime = Date.now();
+    if (currentTime - lastUpdateTime >= updateInterval) {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        lastUpdateTime = currentTime;
+    }
+});
+
+document.addEventListener('mousedown', function(e) {
+    const clickEffect = document.createElement('div');
+    clickEffect.className = 'click-effect';
+    clickEffect.style.left = (e.clientX - 24) + 'px';
+    clickEffect.style.top = (e.clientY - 24) + 'px';
+    document.body.appendChild(clickEffect);
+    
+    setTimeout(() => {
+        document.body.removeChild(clickEffect);
+    }, 500);
+
+    mouseHoldSound.currentTime = 0;
+    mouseHoldSound.play();
+});
+
+document.addEventListener('mouseup', function() {
+    mouseReleaseSound.currentTime = 0;
+    mouseReleaseSound.play();
+});
+
+function showNotification() {
+    const notificationBadge = document.querySelector('.notification-badge');
+    const notificationSound = document.getElementById('notificationSound');
+    
+    // Show notification badge
+    notificationBadge.style.display = 'block';
+    
+    // Only play sound if this is the first notification
+    if (!hasPlayedNotification) {
+        notificationSound.currentTime = 0;
+        notificationSound.play();
+        hasPlayedNotification = true;
+    }
+}
+
+function scheduleNextNotification() {
+    // Random time between 15 and 60 seconds
+    const delay = Math.floor(Math.random() * (60000 - 15000 + 1)) + 15000;
+    
+    setTimeout(() => {
+        showNotification();
+        scheduleNextNotification(); // Schedule next notification
+    }, delay);
+}
+
+// Start notification scheduling when page loads
+scheduleNextNotification();
+
+friendsIcon.addEventListener('click', function() {
+    // Remove this line:
+    // document.querySelector('.notification-badge').style.display = 'none';
+    
+    // Keep the rest of the click counter logic
+    clickCount++;
+    if (clickCount === 11) {
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+        
+        fixmeSound.play();
+        
+        exportSound.currentTime = 0;
+        exportSound.play();
+    }
+});
+
+// Initialize WebSocket connection
+const room = new WebsimSocket();
+
+// Set up store for custom profiles
+room.store.update({
+    id: 'customProfiles',
+    dependencies: {},
+    updateFunction: (existing) => existing || []
+});
+
+// Function to update the current profiles display
+async function updateCurrentProfilesDisplay() {
+    const customProfiles = await room.store.get('customProfiles') || [];
+    const container = document.getElementById('currentProfilesList');
+    const currentUsername = room.party.client.username;
+    
+    container.innerHTML = '';
+    
+    customProfiles.forEach((profile, index) => {
+        const entry = document.createElement('div');
+        entry.className = 'profile-entry';
+        
+        // Show delete button if profile was created by current user OR if current user is "Dex"
+        const deleteButton = (profile.createdBy === currentUsername || currentUsername === "Dex") ? 
+            `<button class="delete-button" onclick="deleteProfile(${index})">DeLete</button>` : 
+            '';
+        
+        entry.innerHTML = `
+            <img src="${profile.image}" alt="Profile picture" width="50" height="50">
+            <span class="profile-entry-name">${profile.name}</span>
+            ${deleteButton}
+        `;
+        
+        container.appendChild(entry);
+    });
+
+    // Show both modals together
+    if (document.getElementById('modalOverlay').style.display === 'block') {
+        document.getElementById('currentProfilesModal').style.display = 'block';
+    }
+}
+
+// Function to delete a profile
+function deleteProfile(index) {
+    room.store.update({
+        id: 'customProfiles',
+        dependencies: { index },
+        updateFunction: (customProfiles) => {
+            if (!customProfiles) return [];
+            return customProfiles.filter((_, i) => i !== index);
+        }
+    });
+}
+
+// Modify the existing click handler for addprofile icon
+document.querySelector('.addprofile-icon').addEventListener('click', () => {
+    document.getElementById('modalOverlay').style.display = 'block';
+    document.getElementById('addProfileModal').style.display = 'block';
+    document.getElementById('currentProfilesModal').style.display = 'block';
+    updateCurrentProfilesDisplay();
+});
+
+// Modify the existing modal overlay click handler
+document.getElementById('modalOverlay').addEventListener('click', () => {
+    document.getElementById('modalOverlay').style.display = 'none';
+    document.getElementById('addProfileModal').style.display = 'none';
+    document.getElementById('currentProfilesModal').style.display = 'none';
+});
+
+// Modify the existing onRecordChanged handler
+room.onRecordChanged = async (id) => {
+    if (id === 'customProfiles') {
+        const customProfiles = await room.store.get('customProfiles');
+        allProfiles = [...profiles, ...customProfiles];
+        updateCurrentProfilesDisplay();
+    }
+};
+
+// Modify the addNewProfile function to include the creator's username when saving profiles
+async function addNewProfile() {
+    const name = document.getElementById('profileName').value;
+    const description = document.getElementById('profileDescription').value;
+    const imageFile = document.getElementById('profileImage').files[0];
+    const creatorUsername = room.party.client.username; // Store the creator's username
+
+    if (containsInappropriateContent(name)) {
+        document.getElementById('nameError').style.display = 'block';
+        return;
+    }
+    if (containsInappropriateContent(description)) {
+        document.getElementById('descriptionError').style.display = 'block';
+        return;
+    }
+
+    try {
+        const imageUrl = await websim.upload(imageFile);
+        
+        profileAddSound.currentTime = 0;
+        profileAddSound.play();
+        
+        await room.store.update({
+            id: 'customProfiles',
+            dependencies: { name, description, imageUrl, creatorUsername },
+            updateFunction: (customProfiles) => {
+                return [...(customProfiles || []), {
+                    image: imageUrl,
+                    name: name,
+                    description: description,
+                    createdBy: creatorUsername // Add creator username to profile
+                }];
+            }
+        });
+
+        document.getElementById('profileName').value = '';
+        document.getElementById('profileDescription').value = '';
+        document.getElementById('profileImage').value = '';
+        
+        updateCurrentProfilesDisplay();
+    } catch (error) {
+        console.error('Error uploading image:', error);
+    }
+}
+
+// Listen for store changes
+room.onRecordChanged = async (id) => {
+    if (id === 'customProfiles') {
+        const customProfiles = await room.store.get('customProfiles');
+        allProfiles = [...profiles, ...customProfiles];
+        updateCurrentProfilesDisplay();
+    }
+};
+
+// Add event listener for the add button
+document.querySelector('.add-button').addEventListener('click', () => {
+    addNewProfile();
+});
+</script>
+
+</body></html>
